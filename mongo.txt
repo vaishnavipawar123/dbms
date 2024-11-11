@@ -1,4 +1,5 @@
 M1: Design and Develop MongoDB Queries using CRUD operations:
+
 Create Employee collection by considering following Fields:
 i. Name: Embedded Doc (FName, LName)
 ii. Company Name: String
@@ -424,3 +425,101 @@ c. db.Employee.find({ Emp_id: 12345 }).explain("executionStats");
 
 7. Return a List of Indexes on created on employee Collection.
 db.Employee.getIndexes();
+
+(M6)
+5555555555555555555555555555555555555555555555555555555
+MAP REDUCE
+
+db.Employee.insertMany([
+  { Emp_Id: 1, Name: "John", Designation: "Programmer", Company_Name: "TCS", Age: 28, Salary: 35000, Address: "Pune" },
+  { Emp_Id: 2, Name: "Alice", Designation: "Tester", Company_Name: "Infosys", Age: 24, Salary: 25000, Address: "Mumbai" },
+  { Emp_Id: 3, Name: "Mike", Designation: "Developer", Company_Name: "Wipro", Age: 30, Salary: 45000, Address: "Pune" },
+  { Emp_Id: 4, Name: "Sara", Designation: "Designer", Company_Name: "TCS", Age: 29, Salary: 32000, Address: "Pune" },
+  { Emp_Id: 5, Name: "Bob", Designation: "Programmer", Company_Name: "Infosys", Age: 26, Salary: 38000, Address: "Chennai" },
+  { Emp_Id: 6, Name: "Kate", Designation: "Developer", Company_Name: "TCS", Age: 42, Salary: 55000, Address: "Pune" },
+  { Emp_Id: 7, Name: "Tom", Designation: "Manager", Company_Name: "TCS", Age: 45, Salary: 60000, Address: "Pune" },
+  { Emp_Id: 8, Name: "Jerry", Designation: "Tester", Company_Name: "Wipro", Age: 50, Salary: 70000, Address: "Pune" }
+]);
+
+
+1. Display the total salary per company
+var mapFunction1 = function() {
+  emit(this.Company_Name, this.Salary);
+};
+
+var reduceFunction1 = function(key, values) {
+  return Array.sum(values);
+};
+
+db.Employee.mapReduce(
+  mapFunction1,
+  reduceFunction1,
+  { out: "TotalSalaryPerCompany" }
+);
+
+// To see the results
+db.TotalSalaryPerCompany.find();
+
+2. Display the total salary of company Name: "TCS"
+var mapFunction2 = function() {
+  if (this.Company_Name === "TCS") {
+    emit(this.Company_Name, this.Salary);
+  }
+};
+
+var reduceFunction2 = function(key, values) {
+  return Array.sum(values);
+};
+
+db.Employee.mapReduce(
+  mapFunction2,
+  reduceFunction2,
+  { out: "TotalSalaryForTCS" }
+);
+
+// To see the results
+db.TotalSalaryForTCS.find();
+
+
+3. Return the average salary of companies whose address is "Pune"
+var mapFunction3 = function() {
+  if (this.Address === "Pune") {
+    emit(this.Company_Name, { totalSalary: this.Salary, count: 1 });
+  }
+};
+
+var reduceFunction3 = function(key, values) {
+  var reducedValue = { totalSalary: 0, count: 0 };
+  values.forEach(function(value) {
+    reducedValue.totalSalary += value.totalSalary;
+    reducedValue.count += value.count;
+  });
+  return reducedValue;
+};
+
+var finalizeFunction3 = function(key, reducedValue) {
+  return reducedValue.totalSalary / reducedValue.count;
+};
+
+db.Employee.mapReduce(
+  mapFunction3,
+  reduceFunction3,
+  {
+    out: "AverageSalaryInPune",
+    finalize: finalizeFunction3
+  }
+);
+
+// To see the results
+db.AverageSalaryInPune.find();
+
+
+4. Display total count for "City=Pune"
+db.Employee.countDocuments({ Address: "Pune" });
+
+
+5. Return count for city Pune and age greater than 40
+db.Employee.countDocuments({ Address: "Pune", Age: { $gt: 40 } });
+
+
+
