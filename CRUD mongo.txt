@@ -1,0 +1,306 @@
+//Startmongoserver
+mongod
+
+//Openmongoshell
+mongo
+
+//1.CreatedatabasecalledEmployeeDB
+useEmployeeDB
+
+
+(M1)
+111111111111111111111111111111111111111111111111111111111
+//2.CreatetableEmployeeandinsertdocuments
+db.Employee.insertMany([
+{}])
+
+
+//3.SelectallwhereDesignation="Programmer"andsalary>30000
+db.Employee.find({"Designation":"Programmer","Salary":{$gt:30000}})
+
+
+//4.CreateanewdocumentifnonematchesDesignation:"Tester",Company_name:"TCS",Age:25
+db.Employee.updateOne({"Designation":"Tester","Company_Name":"TCS","Age":25},{$setOnInsert:{"Designation":"Tester","Company_Name":"TCS","Age":25}},{upsert:true})
+
+
+//5.IncreasesalaryofEmployeeswithCompany_Name"Infosys"by10000
+db.Employee.updateMany({"Company_Name":"Infosys"},{$inc:{"Salary":10000}})
+
+
+//6.ReducesalaryofemployeeswithCompany_Name"TCS"by5000
+db.Employee.updateMany({"Company_Name":"TCS"},{$inc:{"Salary":-5000}})
+
+
+//7.ReturndocumentswhereDesignation!="Tester"
+db.Employee.find({"Designation":{$ne:"Tester"}})
+
+
+//8.FindemployeeswithexactmatchonExpertise["Mongodb","Mysql","Cassandra"]
+db.Employee.find({"Expertise":["Mongodb","Mysql","Cassandra"]})
+
+
+------------------------------------------------------------------
+
+
+db.Employee.insertOne({"Emp_Id":1,"Name":"John","Designation":"Programmer","Company_Name":"TCS","Age":28,"Salary":35000,"Expertise":["Mongodb","Java","C++"]})
+
+
+db.Employee.insertOne({"Emp_Id":2,"Name":"Alice","Designation":"Tester","Company_Name":"Infosys","Age":24,"Salary":25000,"Expertise":["Mysql","Selenium"]})
+
+
+db.Employee.insertOne({"Emp_Id":3,"Name":"Mike","Designation":"Developer","Company_Name":"Wipro","Age":30,"Salary":45000,"Expertise":["Java","Python"]})
+
+
+db.Employee.insertOne({"Emp_Id":4,"Name":"Sara","Designation":"Designer","Company_Name":"TCS","Age":29,"Salary":32000,"Expertise":["Photoshop","Illustrator"]})
+
+
+db.Employee.insertOne({"Emp_Id":5,"Name":"Bob","Designation":"Programmer","Company_Name":"Infosys","Age":26,"Salary":38000,"Expertise":["Mongodb","Mysql","Cassandra"]})
+----------------------------------------------------------------------------
+
+
+
+M2
+2222222222222222222222222222222222222222222222222222222222
+1. Final name of Employee where age is less than 30 and salary 
+more than 50000.  
+db.Employee.find({Age: {$lt: 30}, Salary: {$gt: 50000}}, {Name: 1, _id: 0})
+
+
+
+2. Creates a new document if no document in the employee 
+collection contains {Designation: "Tester", Company_name: "TCS", Age: 25} 
+db.Employee.updateOne({Designation: "Tester", Company_Name: "TCS", Age: 25},{$setOnInsert: {Designation: "Tester", Company_Name: "TCS", Age: 25}},{upsert: true})
+
+
+
+3. Selects all documents in the collection where the field age 
+has a value less than 30 or the value of the salary field is 
+greater than 40000. 
+db.Employee.find({$or: [{Age: {$lt: 30}}, {Salary: {$gt: 40000}}]})
+
+
+
+4. Find documents where Designation is not equal to "Developer". 
+db.Employee.find({Designation: {$ne: "Developer"}})
+
+
+5. Find _id, Designation, Address and Name from all documents 
+where Company_name is "Infosys". db.Employee.find({Company_Name: "Infosys"},{_id: 1, Designation: 1, Address: 1, Name: 1})
+
+
+6. Display only FName and LName of all Employees 
+db.Employee.find({}, {FName: 1, LName: 1, _id: 0})
+
+----------------------------------------------------------------------
+
+(M3)
+333333333333333333333333333333333333333333333333333333333333333333
+1. Creates a new document if no document in the employee 
+collection contains{Designation: "Tester", Company_name: "TCS", Age: 25}
+ 
+db.Employee.updateOne({Designation: "Tester", Company_Name: "TCS", Age: 25},{$setOnInsert: {Designation: "Tester", Company_Name: "TCS", Age: 25}},{upsert: true})
+
+
+
+2. Finds all employees working with Company_name: "TCS" and 
+increase their salary by 2000.  
+db.Employee.updateMany({Company_Name: "TCS"},{$inc: {Salary: 2000}})
+
+
+3. Matches all documents where the value of the field Address is 
+an embedded document that contains only the field city with the value "Pune" and the field Pin_code with the value "411001". 
+db.Employee.find({Address: {city: "Pune", Pin_code: "411001"}})
+
+
+4. Find employee details who are working as "Developer" or 
+"Tester". 
+db.Employee.find({Designation: {$in: ["Developer", "Tester"]}})
+
+
+5. Drop Single documents where designation="Developer". 
+db.Employee.deleteOne({Designation: "Developer"})
+
+
+6. Count number of documents in employee collection. 
+db.Employee.countDocuments()
+-----------------------------------------------------------------
+
+(M4)
+44444444444444444444444444444444444444444444444444(AGGREGATION)
+
+db.Employee.insertMany([
+  { "Emp_Id": 1, "Name": "John", "Designation": "Manager", "Company_Name": "TCS", "Age": 40, "Salary": 80000, "Expertise": ["Mongodb", "Java"] },
+  { "Emp_Id": 2, "Name": "Alice", "Designation": "Manager", "Company_Name": "Infosys", "Age": 38, "Salary": 90000, "Expertise": ["Mysql", "Selenium"] },
+  { "Emp_Id": 3, "Name": "Mike", "Designation": "Developer", "Company_Name": "Wipro", "Age": 30, "Salary": 70000, "Expertise": ["Java", "Python"] },
+  { "Emp_Id": 4, "Name": "Sara", "Designation": "DBA", "Company_Name": "TCS", "Age": 29, "Salary": 65000, "Expertise": ["SQL", "Oracle"] },
+  { "Emp_Id": 5, "Name": "Bob", "Designation": "DBA", "Company_Name": "Infosys", "Age": 26, "Salary": 60000, "Expertise": ["Mongodb", "Mysql"] }
+])
+
+ 
+1. Using aggregation Return Designation with Total Salary is 
+Above 200000. 
+db.Employee.aggregate([{$group:{_id:"$Designation",totalSalary:{ $sum:"$Salary" }}},{$match: {totalSalary: { $gt:200000 }}}])
+
+2. Using Aggregate method returns names and _id in upper case and 
+in alphabetical order. 
+db.Employee.aggregate([{$project: {_id: 1,Name: { $toUpper: "$Name" }}},{$sort:{ Name: 1 }}])
+
+
+3. Using aggregation method find Employee with Total Salary for 
+Each City with Designation="DBA". 
+db.Employee.aggregate([{$match: { Designation: "DBA" }},{$group: { _id: "$City",totalSalary: { $sum: "$Salary" }}}])
+
+
+4. Create Single Field Indexes on Designation field of employee 
+collection 
+db.Employee.createIndex({ Designation: 1 })
+
+5. To Create Multikey Indexes on Expertise field of employee 
+collection. 
+db.Employee.createIndex({ Expertise: 1 })
+
+
+6. Create an Index on Emp_id field, compare the time require to 
+search Emp_id before and after creating an index. (Hint Add at 
+least 10000 Documents) 
+Step 1: Insert 10,000 Documents for testing
+
+javascript
+Copy code
+for (let i = 1; i <= 10000; i++) {
+  db.Employee.insertOne({
+    Emp_Id: i,
+    Name: `Employee${i}`,
+    Designation: "Tester",
+    Company_Name: "CompanyX",
+    Age: 25 + (i % 10),
+    Salary: 30000 + (i * 10),
+    Expertise: ["Skill1", "Skill2"]
+  });
+}
+Step 2: Search without an index
+
+javascript
+Copy code
+// Measure time taken without an index
+const start = new Date();
+db.Employee.find({ Emp_Id: 5000 }).explain("executionStats");
+const end = new Date();
+print("Time taken without index: " + (end - start) + "ms");
+Step 3: Create the Index
+
+javascript
+Copy code
+db.Employee.createIndex({ Emp_Id: 1 })
+Step 4: Search after creating the index
+
+javascript
+Copy code
+// Measure time taken with an index
+const startWithIndex = new Date();
+db.Employee.find({ Emp_Id: 5000 }).explain("executionStats");
+const endWithIndex = new Date();
+print("Time taken with index: " + (endWithIndex - startWithIndex) + "ms");
+
+
+7. Return a List of Indexes on created on employee Collection. 
+db.Employee.getIndexes()
+--------------------------------------------------------------------------
+
+(M6)
+5555555555555555555555555555555555555555555555555555555
+MAP REDUCE
+
+db.Employee.insertMany([
+  { Emp_Id: 1, Name: "John", Designation: "Programmer", Company_Name: "TCS", Age: 28, Salary: 35000, Address: "Pune" },
+  { Emp_Id: 2, Name: "Alice", Designation: "Tester", Company_Name: "Infosys", Age: 24, Salary: 25000, Address: "Mumbai" },
+  { Emp_Id: 3, Name: "Mike", Designation: "Developer", Company_Name: "Wipro", Age: 30, Salary: 45000, Address: "Pune" },
+  { Emp_Id: 4, Name: "Sara", Designation: "Designer", Company_Name: "TCS", Age: 29, Salary: 32000, Address: "Pune" },
+  { Emp_Id: 5, Name: "Bob", Designation: "Programmer", Company_Name: "Infosys", Age: 26, Salary: 38000, Address: "Chennai" },
+  { Emp_Id: 6, Name: "Kate", Designation: "Developer", Company_Name: "TCS", Age: 42, Salary: 55000, Address: "Pune" },
+  { Emp_Id: 7, Name: "Tom", Designation: "Manager", Company_Name: "TCS", Age: 45, Salary: 60000, Address: "Pune" },
+  { Emp_Id: 8, Name: "Jerry", Designation: "Tester", Company_Name: "Wipro", Age: 50, Salary: 70000, Address: "Pune" }
+]);
+
+
+1. Display the total salary per company
+var mapFunction1 = function() {
+  emit(this.Company_Name, this.Salary);
+};
+
+var reduceFunction1 = function(key, values) {
+  return Array.sum(values);
+};
+
+db.Employee.mapReduce(
+  mapFunction1,
+  reduceFunction1,
+  { out: "TotalSalaryPerCompany" }
+);
+
+// To see the results
+db.TotalSalaryPerCompany.find();
+
+2. Display the total salary of company Name: "TCS"
+var mapFunction2 = function() {
+  if (this.Company_Name === "TCS") {
+    emit(this.Company_Name, this.Salary);
+  }
+};
+
+var reduceFunction2 = function(key, values) {
+  return Array.sum(values);
+};
+
+db.Employee.mapReduce(
+  mapFunction2,
+  reduceFunction2,
+  { out: "TotalSalaryForTCS" }
+);
+
+// To see the results
+db.TotalSalaryForTCS.find();
+
+
+3. Return the average salary of companies whose address is "Pune"
+var mapFunction3 = function() {
+  if (this.Address === "Pune") {
+    emit(this.Company_Name, { totalSalary: this.Salary, count: 1 });
+  }
+};
+
+var reduceFunction3 = function(key, values) {
+  var reducedValue = { totalSalary: 0, count: 0 };
+  values.forEach(function(value) {
+    reducedValue.totalSalary += value.totalSalary;
+    reducedValue.count += value.count;
+  });
+  return reducedValue;
+};
+
+var finalizeFunction3 = function(key, reducedValue) {
+  return reducedValue.totalSalary / reducedValue.count;
+};
+
+db.Employee.mapReduce(
+  mapFunction3,
+  reduceFunction3,
+  {
+    out: "AverageSalaryInPune",
+    finalize: finalizeFunction3
+  }
+);
+
+// To see the results
+db.AverageSalaryInPune.find();
+
+
+4. Display total count for "City=Pune"
+db.Employee.countDocuments({ Address: "Pune" });
+
+
+5. Return count for city Pune and age greater than 40
+db.Employee.countDocuments({ Address: "Pune", Age: { $gt: 40 } });
+
+
+(M5)

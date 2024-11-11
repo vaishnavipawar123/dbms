@@ -1,0 +1,103 @@
+
+(S8)
+CREATE DATABASE CompanyOrdersDB;
+
+USE CompanyOrdersDB;
+
+CREATE TABLE Companies (comp_id INT PRIMARY KEY,name VARCHAR(100) NOT NULL,cost DECIMAL(10, 2) NOT NULL,year INT NOT NULL);
+
+CREATE TABLE Orders (comp_id INT,domain VARCHAR(100),quantity INT,FOREIGN KEY (comp_id) REFERENCES Companies(comp_id));
+
+INSERT INTO Companies (comp_id, name, cost, year) VALUES
+(1, 'Company A', 25000.00, 2021),
+(2, 'Company B', 15000.00, 2022),
+(3, 'Company C', 30000.00, 2023),
+(4, 'Company D', 20000.00, 2022);
+
+
+INSERT INTO Orders (comp_id, domain, quantity) VALUES
+(1, 'Tech', 100),
+(2, 'Health', 50),
+(3, 'Finance', 75);
+
+
+
+1. Find names, costs, domains and quantities for companies using 
+inner join. 
+SELECT Companies.name, Companies.cost, Orders.domain, Orders.quantity
+FROM Companies 
+INNER JOIN Orders ON Companies.comp_id = Orders.comp_id;
+
+
+2. Find names, costs, domains and quantities for companies using 
+left outer join. 
+SELECT Companies.name, Companies.cost,  Orders.domain, Orders.quantity
+FROM Companies 
+LEFT JOIN Orders ON Companies.comp_id = Orders.comp_id;
+
+
+3. Find names, costs, domains and quantities for companies using 
+right outer join.
+SELECT Companies.name, Companies.cost, Orders.domain, Orders.quantity
+FROM Companies 
+RIGHT JOIN Orders ON Companies.comp_id = Orders.comp_id;
+
+
+
+
+4. Find names, costs, domains and quantities for companies using 
+Union operator.
+SELECT Companies.name, Companies.cost, Orders.domain, Orders.quantity
+FROM Companies 
+INNER JOIN Orders ON Companies.comp_id = Orders.comp_id
+UNION
+SELECT Companies.name, Companies.cost, Orders.domain, Orders.quantity
+FROM Companies 
+RIGHT JOIN Orders ON Companies.comp_id = Orders.comp_id;
+
+
+
+5. Create View View1 by selecting both tables to show company 
+name and quantities.
+CREATE VIEW View1 AS
+SELECT Companies.name, Orders.quantity
+FROM Companies 
+INNER JOIN Orders ON Companies.comp_id = Orders.comp_id;
+
+
+
+6. Create View View2 by selecting any two columns and perform 
+insert update delete operations. 
+CREATE VIEW View2 AS
+SELECT 
+    name, 
+    cost
+FROM 
+    Companies;
+
+-- Insert Operation
+INSERT INTO View2 (name, cost) VALUES ('Company E', 18000.00);
+
+-- Show the contents of View2 after insert
+SELECT * FROM View2;
+
+-- Update Operation
+UPDATE View2 SET cost = 19000.00 WHERE name = 'Company E';
+
+-- Show the contents of View2 after update
+SELECT * FROM View2;
+
+-- Delete Operation
+DELETE FROM View2 WHERE name = 'Company E';
+
+-- Show the contents of View2 after delete
+SELECT * FROM View2;
+
+
+
+7. Display content of View1, View2.-- Display contents of View1
+SELECT * FROM View1;
+
+-- Display contents of View2
+SELECT * FROM View2;
+

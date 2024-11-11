@@ -1,0 +1,184 @@
+
+
+(S4)
+CREATE TABLE Cust_Master (Cust_no VARCHAR(10) PRIMARY KEY,Cust_name VARCHAR(50) NOT NULL,Cust_addr VARCHAR(100) NOT NULL);
+
+
+CREATE TABLE Orders (Order_no INT PRIMARY KEY,Cust_no VARCHAR(10) NOT NULL,Order_date DATE NOT NULL,Qty_Ordered INT CHECK(Qty_Ordered > 0),FOREIGN KEY (Cust_no) REFERENCES Cust_Master(Cust_no) ON DELETE CASCADE);
+
+
+CREATE TABLE Product (Product_no INT PRIMARY KEY,Product_name VARCHAR(50) NOT NULL,Order_no INT NOT NULL,FOREIGN KEY (Order_no) REFERENCES Orders(Order_no) ON DELETE CASCADE);
+
+INSERT INTO Cust_Master (Cust_no, Cust_name, Cust_addr) VALUES
+('C1001', 'Alice Brown', 'Bangalore'),
+('C1002', 'Mark Johnson', 'Mangalore'),
+('C1003', 'Sara Smith', 'Mumbai'),
+('C1004', 'Paul White', 'Bangalore'),
+('C1005', 'David Adams', 'Mangalore');
+
+
+INSERT INTO Orders (Order_no, Cust_no, Order_date, Qty_Ordered) VALUES
+(101, 'C1001', '2024-01-15', 10),
+(102, 'C1002', '2024-02-10', 5),
+(103, 'C1003', '2024-03-05', 8),
+(104, 'C1004', '2024-04-12', 3),
+(105, 'C1005', '2024-05-07', 7);
+
+INSERT INTO Product (Product_no, Product_name, Order_no) VALUES
+(1, 'Laptop', 101),
+(2, 'Tablet', 102),
+(3, 'Smartphone', 103),
+(4, 'Headphones', 104),
+(5, 'Camera', 105);
+
+
+
+1. List names of customers having 'A' as second letter in their 
+name.
+SELECT Cust_name 
+FROM Cust_Master 
+WHERE Cust_name LIKE '_A%';
+
+
+2. Display order from Customer no C1002,C1005,C1007 and C1008 
+SELECT * 
+FROM Orders 
+WHERE Cust_no IN ('C1002', 'C1005', 'C1007', 'C1008');
+
+
+3. List Clients who stay in either 'Banglore or 'Manglore'
+SELECT Cust_name 
+FROM Cust_Master 
+WHERE Cust_addr IN ('Bangalore', 'Mangalore');
+
+
+4. Display name of customers& the product_name they have purchase
+SELECT Cust_Master.Cust_name, Product.Product_name 
+FROM Cust_Master
+JOIN Orders ON Cust_Master.Cust_no = Orders.Cust_no
+JOIN Product ON Orders.Order_no = Product.Order_no;
+
+
+5. Create view View1 consisting of Cust_name, Product_name. 
+CREATE VIEW View1 AS
+SELECT Cust_Master.Cust_name, Product.Product_name
+FROM Cust_Master
+JOIN Orders ON Cust_Master.Cust_no = Orders.Cust_no
+JOIN Product ON Orders.Order_no = Product.Order_no;
+
+
+6. Disply product_name and quantity purchase by each customer
+SELECT Cust_Master.Cust_name, Product.Product_name, Orders.Qty_Ordered
+FROM Cust_Master
+JOIN Orders ON Cust_Master.Cust_no = Orders.Cust_no
+JOIN Product ON Orders.Order_no = Product.Order_no;
+
+
+7. Perform different joint operation.(inner)
+SELECT Cust_Master.Cust_name, Product.Product_name
+FROM Cust_Master
+INNER JOIN Orders ON Cust_Master.Cust_no = Orders.Cust_no
+INNER JOIN Product ON Orders.Order_no = Product.Order_no;
+
+(left)
+SELECT Cust_Master.Cust_name, Product.Product_name
+FROM Cust_Master
+LEFT JOIN Orders ON Cust_Master.Cust_no = Orders.Cust_no
+LEFT JOIN Product ON Orders.Order_no = Product.Order_no;
+
+(right)
+SELECT Cust_Master.Cust_name, Product.Product_name
+FROM Product
+RIGHT JOIN Orders ON Product.Order_no = Orders.Order_no
+RIGHT JOIN Cust_Master ON Orders.Cust_no = Cust_Master.Cust_no;
+
+
+
+
+(S9)
+CREATE DATABASE ShopDB;
+
+USE ShopDB;
+
+CREATE TABLE CUSTOMERS(CNo INT PRIMARY KEY,Cname VARCHAR(100) NOT NULL,Ccity VARCHAR(100) NOT NULL,CMobile VARCHAR(15) NOT NULL);
+
+CREATE TABLE ITEMS(INo INT PRIMARY KEY,Iname VARCHAR(100) NOT NULL,Itype VARCHAR(50) NOT NULL,Iprice DECIMAL(10,2) NOT NULL,Icount INT NOT NULL);
+
+CREATE TABLE PURCHASE(PNo INT PRIMARY KEY,Pdate DATE NOT NULL,Pquantity INT NOT NULL,CNo INT,INo INT,FOREIGN KEY(CNo) REFERENCES CUSTOMERS(CNo),FOREIGN KEY(INo) REFERENCES ITEMS(INo));
+
+
+INSERT INTO CUSTOMERS(CNo,Cname,Ccity,CMobile) VALUES(1,'Gopal','Delhi','9876543210'),(2,'Maya','Mumbai','9123456780'),(3,'Ravi','Delhi','9988776655'),(4,'Sita','Pune','9988776655');
+
+INSERT INTO ITEMS(INo,Iname,Itype,Iprice,Icount) VALUES(1,'Notebook','Stationary',450.00,100),(2,'Pen','Stationary',150.00,200),(3,'Pencil','Stationary',50.00,300),(4,'Marker','Stationary',600.00,150),(5,'Eraser','Stationary',30.00,500),(6,'Paper','Office Supply',250.00,400),(7,'Folder','Office Supply',750.00,80);
+
+INSERT INTO PURCHASE(PNo,Pdate,Pquantity,CNo,INo) VALUES(1,'2024-10-01',2,1,1),(2,'2024-10-05',1,2,4),(3,'2024-10-02',3,3,1),(4,'2024-09-28',5,4,2);
+-----------------------------------------------
+1. List all stationary items with price between 400/- to 1000/-
+SELECT * FROM ITEMS WHERE Itype='Stationary' AND Iprice BETWEEN 400 AND 1000;
+
+2. Change the mobile number of customer “Gopal” 
+UPDATE CUSTOMERS SET CMobile='9998887776' WHERE Cname='Gopal';
+
+3. Display the item with maximum price 
+SELECT * FROM ITEMS ORDER BY Iprice DESC LIMIT 1;
+
+4. Display all purchases sorted from the most recent to the 
+oldest 
+SELECT * FROM PURCHASE ORDER BY Pdate DESC;
+
+5. Count the number of customers in every city 
+SELECT Ccity,COUNT(*) AS CustomerCount FROM CUSTOMERS GROUP BY Ccity;
+
+6. Display all purchased quantity of Customer Maya 
+SELECT Pquantity FROM PURCHASE WHERE CNo=(SELECT CNo FROM CUSTOMERS WHERE Cname='Maya');
+
+7. Create view which shows Iname, Price and Count of all 
+stationary items in descending order of price.
+CREATE VIEW StationaryItemsView AS SELECT Iname,Iprice,Icount FROM ITEMS WHERE Itype='Stationary' ORDER BY Iprice DESC;
+SELECT * FROM StationaryItemsView;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
