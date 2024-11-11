@@ -1,0 +1,128 @@
+Write a database trigger on Library table. The System should keep track of the records that are
+being updated or deleted. The old value of updated or deleted records should be added in
+Library_Audit table.
+
+CREATE TABLE Library (
+    Book_ID NUMBER PRIMARY KEY,
+    Title VARCHAR2(100),
+    Author VARCHAR2(100),
+    Publisher VARCHAR2(100)
+);
+
+CREATE TABLE Library_Audit (
+    Audit_ID NUMBER PRIMARY KEY,
+    Book_ID NUMBER,
+    Title VARCHAR2(100),
+    Author VARCHAR2(100),
+    Publisher VARCHAR2(100),
+    Operation VARCHAR2(10),
+    Change_Date DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE Audit_ID_Seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE;
+
+CREATE OR REPLACE TRIGGER before_update_library
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (Audit_ID, Book_ID, Title, Author, Publisher, Operation, Change_Date)
+    VALUES (Audit_ID_Seq.NEXTVAL, :OLD.Book_ID, :OLD.Title, :OLD.Author, :OLD.Publisher, 'UPDATE', SYSDATE);
+END;
+
+CREATE OR REPLACE TRIGGER before_delete_library
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (Audit_ID, Book_ID, Title, Author, Publisher, Operation, Change_Date)
+    VALUES (Audit_ID_Seq.NEXTVAL, :OLD.Book_ID, :OLD.Title, :OLD.Author, :OLD.Publisher, 'DELETE', SYSDATE);
+END;
+
+after:
+CREATE OR REPLACE TRIGGER after_update_library
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (Audit_ID, Book_ID, Title, Author, Publisher, Operation, Change_Date)
+    VALUES (Audit_ID_Seq.NEXTVAL, :OLD.Book_ID, :OLD.Title, :OLD.Author, :OLD.Publisher, 'UPDATE', SYSDATE);
+END;
+
+CREATE OR REPLACE TRIGGER after_delete_library
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (Audit_ID, Book_ID, Title, Author, Publisher, Operation, Change_Date)
+    VALUES (Audit_ID_Seq.NEXTVAL, :OLD.Book_ID, :OLD.Title, :OLD.Author, :OLD.Publisher, 'DELETE', SYSDATE);
+END;
+
+-----------------
+easy:
+CREATE TABLE Library (
+    Book_ID    NUMBER PRIMARY KEY,
+    Title      VARCHAR2(100),
+    Author     VARCHAR2(100),
+    Publisher  VARCHAR2(100)
+);
+
+CREATE TABLE Library_Audit (
+    Audit_ID   NUMBER DEFAULT PRIMARY KEY,
+    Book_ID    NUMBER,
+    Title      VARCHAR2(100),
+    Author     VARCHAR2(100),
+    Publisher  VARCHAR2(100),
+    Operation  VARCHAR2(10),  
+    Change_Date DATE DEFAULT SYSDATE
+);
+
+TRIGGERS:
+//AFTER UPDATE
+CREATE OR REPLACE TRIGGER trg_library_update
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (Book_ID, Title, Author, Publisher, Operation, Change_Date)
+    VALUES (:OLD.Book_ID, :OLD.Title, :OLD.Author, :OLD.Publisher, 'UPDATE', SYSDATE);
+END;
+/
+
+//AFTER DELETE
+CREATE OR REPLACE TRIGGER trg_library_delete
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    -- Insert old values into Library_Audit when a delete happens
+    INSERT INTO Library_Audit (Book_ID, Title, Author, Publisher, Operation, Change_Date)
+    VALUES (:OLD.Book_ID, :OLD.Title, :OLD.Author, :OLD.Publisher, 'DELETE', SYSDATE);
+END;
+/
+
+//INSERT, UPDATE AND DELETE QUERIES
+INSERT INTO Library (Book_ID, Title, Author, Publisher)
+VALUES (1, 'DBMS', 'XYZ', 'Pearson');
+
+INSERT INTO Library (Book_ID, Title, Author, Publisher)
+VALUES (2, 'DSA', 'Cormen', 'MIT');
+
+UPDATE Library
+SET Title = 'DB Systems'
+WHERE Book_ID = 1;
+
+DELETE FROM Library WHERE Book_ID = 2;
+
+//SELECT:
+SELECT * FROM Library;
+----------------------------------------------------
+BOOK_ID	 TITLE		 AUTHOR	  PUBLISHER
+----------------------------------------------------
+1		 DB Systems	  	XYZ	  	  Pearson
+----------------------------------------------------
+
+SELECT * FROM Library_Audit;
+-----------------------------------------------------
+A_ID   TITLE  AUTHOR  PUBLISHER OPERATION	CHANGE_DATE
+----------------------------------------------------- 
+ 1	  DBMS     XYZ	Pearson   UPDATE	  22-SEP-24
+ 2	  DSA	   Cormen	MIT	    DELETE	  22-SEP-24
+ ----------------------------------------------------

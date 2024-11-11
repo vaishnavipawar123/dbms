@@ -1,0 +1,38 @@
+Write a PL/SQL block for following requirements and handle the
+exceptions. Roll no. of students will be entered by the user.
+Attendance of roll no. entered by user will be checked in the Stud
+table. If attendance is less than 75% then display the message
+“Term not granted” and set the status in stud table as “Detained”.
+Otherwise display message “Term granted” and set the status in stud
+table as “Not Detained”. Student (Roll, Name, Attendance, Status)
+----------------------
+Create table STUD(roll number,name varchar(20),attendance number, status varchar(20));
+
+INSERT INTO STUD (roll, name, attendance, status) VALUES (101, 'John Doe', 80, 'Not Detained');
+INSERT INTO STUD (roll, name, attendance, status)VALUES (102, 'Jane Smith', 65, 'Not Detained');
+INSERT INTO STUD (roll, name, attendance, status)VALUES (103, 'Alice Johnson', 90, 'Not Detained');
+INSERT INTO STUD (roll, name, attendance, status)VALUES (104, 'Bob Brown', 70, 'Not Detained');
+
+SQL> set serveroutput on;
+SQL> DECLARE
+v_roll STUD.roll%TYPE;
+v_attendance STUD.attendance%TYPE;
+v_status STUD.status%TYPE;
+BEGIN
+dbms_output.put_line('Enter roll no: ');
+v_roll:= &v_roll;
+SELECT attendance, status INTO v_attendance, v_status FROM STUD WHERE roll=v_roll;
+IF v_attendance < 75 THEN
+dbms_output.put_line('Term not granted');
+UPDATE STUD SET status='Detained' WHERE roll=v_roll;
+ELSE
+dbms_output.put_line('Term granted');
+UPDATE STUD SET status='Not detained' WHERE roll=v_roll;
+END IF;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+DBMS_OUTPUT.PUT_LINE('No record found');
+END;
+/
+
+select * from STUD;

@@ -1,0 +1,75 @@
+Write a Stored Procedure namely proc_Grade for the categorization of student. 
+If marks scored by students in examination is <=1500 and marks>=990 then student will be placed in distinction
+category if marks scored are between 989 and 900 category is first class, if marks 899 and 825
+category is Higher Second Class.
+Stud_Marks(name, total_marks) 
+Result(Roll,Name, Class)
+
+CREATE TABLE Stud_mks(Roll_no NUMBER(5) PRIMARY KEY, Name VARCHAR(20), total_mks NUMBER(5));
+CREATE TABLE Result(Roll_no NUMBER(5) PRIMARY KEY, Name VARCHAR(20), grade VARCHAR(20));
+
+INSERT INTO Stud_mks(Roll_no, Name, total_mks) VALUES (1, 'Disha Gore', 1350);
+INSERT INTO Stud_mks(Roll_no, Name, total_mks) VALUES(2, 'Sara Sayyad', 1200);
+INSERT INTO Stud_mks(Roll_no, Name, total_mks) VALUES(3, 'Apoorva Karne', 1050);
+INSERT INTO Stud_mks(Roll_no, Name, total_mks) VALUES(4, 'Aditya Konde', 1150);
+INSERT INTO Stud_mks(Roll_no, Name, total_mks) VALUES(5, 'Omm Kharche', 980);
+INSERT INTO Stud_mks(Roll_no, Name, total_mks) VALUES(6, 'Atharv Ombase', 890);
+
+
+CREATE OR REPLACE PROCEDURE Proc_grade AS 
+BEGIN 
+    FOR i IN (SELECT * FROM Stud_mks) LOOP 
+        dbms_output.put_line('Roll no: ' || i.roll_no || ' Name: ' || i.name || ' Total Mks: ' || i.total_mks); 
+         
+        IF i.total_mks <= 1500 AND i.total_mks >= 990 THEN 
+            INSERT INTO Result VALUES (i.roll_no, i.name, 'DISTINCTION'); 
+        ELSIF i.total_mks <= 989 AND i.total_mks >= 900 THEN  
+            INSERT INTO Result VALUES (i.roll_no, i.name, 'FIRST CLASS'); 
+        ELSIF i.total_mks <= 899 AND i.total_mks >= 825 THEN 
+            INSERT INTO Result VALUES (i.roll_no, i.name, 'HIGHER SECOND CLASS'); 
+        ELSIF i.total_mks <= 824 THEN 
+            INSERT INTO Result VALUES (i.roll_no, i.name, 'FAIL'); 
+        END IF; 
+    END LOOP; 
+END Proc_grade;   
+
+Procedure created.
+
+
+BEGIN 
+    Proc_grade; 
+END; 
+
+Statement processed.
+Roll no: 1 Name: Disha Gore Total Mks: 1350
+Roll no: 2 Name: Sara Sayyad Total Mks: 1200
+Roll no: 3 Name: Apoorva Karne Total Mks: 1050
+Roll no: 4 Name: Aditya Konde Total Mks: 1150
+Roll no: 5 Name: Omm Kharche Total Mks: 980
+Roll no: 6 Name: Atharv Ombase Total Mks: 890
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT * FROM Result
+
+---------------------------------------------
+ROLL_NO	NAME	        	GRADE
+---------------------------------------------
+1	    Disha Gore		DISTINCTION
+2	    Sara Sayyad		DISTINCTION
+3	    Apoorva Karne		DISTINCTION
+4	    Aditya Konde		DISTINCTION
+5	    Omm Kharche		FIRST CLASS
+6	    Atharv Ombase		HIGHER SECOND CLASS
+----------------------------------------------
+

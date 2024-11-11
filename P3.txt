@@ -1,0 +1,97 @@
+P3: Write a PL/SQL block of code using Cursor that will merge the data
+available in the newly created table N_Roll Call with the data
+available in the table O_RollCall. If the data in the first table
+already exist in the second table, then that data should be
+skipped.
+
+Create table O_rcall(rno number,name varchar(20));
+Create table N_rcall(rno number,name varchar(20));
+Insert into O_rcall values(1,'abc');
+Insert into O_rcall values(2,'def');
+Insert into O_rcall values(3,'ghi');
+Insert into N_rcall values(1,'abc');
+Insert into N_rcall values(4,'efg');
+Insert into N_rcall values(5,'xyz');
+select * from O_rcall;
+select * from N_rcall;
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR nc(pno NUMBER) IS 
+        SELECT rno, name FROM N_rcall WHERE rno = pno;
+    pro NUMBER;
+    pname VARCHAR(20);
+    v_count NUMBER;
+BEGIN
+    pro := &pro;
+    OPEN nc(pro);
+    FETCH nc INTO pro, pname;
+    IF nc%FOUND THEN
+        BEGIN
+            SELECT COUNT(*) INTO v_count FROM O_rcall WHERE rno = pro;
+            IF v_count = 0 THEN
+                INSERT INTO O_rcall (rno, name)
+                VALUES (pro, pname);
+                DBMS_OUTPUT.PUT_LINE('Record with rno ' || pro || ' inserted into O_rcall.');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('Duplicate record: rno ' || pro || ' already exists in O_rcall.');
+            END IF;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                INSERT INTO O_rcall (rno, name)
+                VALUES (pro, pname);
+                DBMS_OUTPUT.PUT_LINE('Record with rno ' || pro || ' inserted into O_rcall.');
+        END;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No record found in N_rcall with rno ' || pro);
+    END IF;
+    CLOSE nc;
+END;
+/
+
+
+
+
+------------------
+Create table O_rcall(rno number,name varchar(20));
+Create table N_rcall(rno number,name varchar(20));
+Insert into O_rcall values(1,'abc');
+Insert into O_rcall values(2,'def');
+Insert into O_rcall values(3,'ghi');
+Insert into N_rcall values(1,'abc');
+Insert into N_rcall values(4,'efg');
+Insert into N_rcall values(5,'xyz');
+select * from O_rcall;
+select * from N_rcall;
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR nc(pno NUMBER) IS 
+        SELECT rno, name FROM N_rcall WHERE rno = pno;
+    pro NUMBER;
+    pname VARCHAR(20);
+    v_count NUMBER;
+BEGIN
+    pro := &pro;
+    OPEN nc(pro);
+    FETCH nc INTO pro, pname;
+
+    IF nc%FOUND THEN
+        -- Check if the record exists in O_rcall
+        SELECT COUNT(*) INTO v_count FROM O_rcall WHERE rno = pro;
+
+        IF v_count = 0 THEN
+            -- Insert into O_rcall if the record does not exist
+            INSERT INTO O_rcall (rno, name)
+            VALUES (pro, pname);
+            DBMS_OUTPUT.PUT_LINE('Record with rno ' || pro || ' inserted into O_rcall.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Duplicate record: rno ' || pro || ' already exists in O_rcall.');
+        END IF;
+    ELSE
+        -- If no record is found in N_rcall, print a message
+        DBMS_OUTPUT.PUT_LINE('No record found in N_rcall with rno ' || pro);
+    END IF;
+
+    -- Close the cursor after completing the logic
+    CLOSE nc;
+END;
+/

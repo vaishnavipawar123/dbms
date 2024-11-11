@@ -1,0 +1,56 @@
+P5: Write a PL/SQL Block to increase the salary of employees by 10% of
+existing salary, who are having salary less than average salary of
+organization, whenever such salary updates take place, a record for
+same is maintained in the increment_salary table.
+emp(emp_no, salary)
+increment_salary(emp_no, salary)
+
+CREATE TABLE emp (
+    emp_no NUMBER PRIMARY KEY,
+    salary NUMBER
+);
+CREATE TABLE increment_salary (
+    emp_no NUMBER,
+    salary NUMBER,
+    increment_date DATE DEFAULT SYSDATE,
+    CONSTRAINT fk_emp_no FOREIGN KEY (emp_no) REFERENCES emp(emp_no)
+);
+INSERT INTO emp (emp_no, salary) VALUES (101, 40000);
+INSERT INTO emp (emp_no, salary) VALUES (102, 35000);
+INSERT INTO emp (emp_no, salary) VALUES (103, 60000);
+INSERT INTO emp (emp_no, salary) VALUES (104, 45000);
+select * from emp;
+
+select AVG(salary) from emp;
+--------------------------------------
+DECLARE
+    v_avg_salary    NUMBER;
+    v_emp_no        emp.emp_no%TYPE;
+    v_current_salary emp.salary%TYPE;
+BEGIN
+    SELECT AVG(salary) INTO v_avg_salary FROM emp;
+
+    FOR emp_record IN (SELECT emp_no, salary FROM emp WHERE salary < v_avg_salary) LOOP
+        v_emp_no := emp_record.emp_no;
+        v_current_salary := emp_record.salary;
+
+        UPDATE emp
+        SET salary = v_current_salary * 1.10
+        WHERE emp_no = v_emp_no;
+
+        INSERT INTO increment_salary (emp_no, salary)
+        VALUES (v_emp_no, v_current_salary * 1.10);
+
+        DBMS_OUTPUT.PUT_LINE('Salary updated for emp_no: ' || v_emp_no || ' New salary: ' || v_current_salary * 1.10);
+    END LOOP;
+
+    COMMIT;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+------------------------------
+select * from increment_salary;

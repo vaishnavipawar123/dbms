@@ -1,0 +1,54 @@
+P7: Create a stored function titled 'Age_calc'.
+Accept the date of birth of a person as a parameter.
+Calculate the age of the person in years, months and days e.g. 3
+years, 2months, 10 days.
+Return the age in years directly (with the help of Return
+statement). The months and days are to be returned indirectly in
+the form of OUT parameters.
+
+
+CREATE OR REPLACE FUNCTION Age_calc (
+    p_dob DATE,
+    p_months OUT NUMBER,
+    p_days OUT NUMBER
+) RETURN NUMBER IS
+    v_years NUMBER;
+    v_diff NUMBER;  -- Use NUMBER type instead of DATE
+BEGIN
+    -- Calculate the difference between today's date and the date of birth (in days)
+    v_diff := SYSDATE - p_dob;
+    
+    -- Calculate years from the total number of days
+    v_years := FLOOR(v_diff / 365);
+    
+    -- Calculate months based on the remaining days after calculating years
+    p_months := FLOOR((v_diff - (v_years * 365)) / 30);
+    
+    -- Calculate remaining days
+    p_days := ROUND(v_diff - (v_years * 365) - (p_months * 30));
+
+    -- Return the calculated years
+    RETURN v_years;
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_dob DATE;
+    v_years NUMBER;
+    v_months NUMBER;
+    v_days NUMBER;
+BEGIN
+    -- Prompt the user to input their Date of Birth (DOB)
+    v_dob := TO_DATE('&dob', 'YYYY-MM-DD');
+    
+    -- Call the function and store the returned years
+    v_years := Age_calc(v_dob, v_months, v_days);
+    
+    -- Display the calculated age
+    DBMS_OUTPUT.PUT_LINE('Age: ' || v_years || ' years, ' || v_months || ' months, ' || v_days || ' days');
+END;
+/
+
+

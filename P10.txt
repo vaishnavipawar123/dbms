@@ -1,0 +1,75 @@
+Trigger: Write a after trigger for Insert, update and delete event
+considering following requirement:
+Emp(Emp_no, Emp_name, Emp_salary)
+a) Trigger should be initiated when salary tried to be inserted
+is less than Rs.50,000/-
+b) Trigger should be initiated when salary tried to be updated
+for value less than Rs. 50,000/-
+Also the new values expected to be inserted will be stored in new
+table Tracking(Emp_no,Emp_salary).
+-- Create Emp table
+CREATE TABLE Emp (
+    Emp_no INT PRIMARY KEY,
+    Emp_name VARCHAR2(50),
+    Emp_salary NUMBER(10, 2)
+);
+
+-- Create Tracking table (if not already created)
+CREATE TABLE Tracking (
+    Emp_no INT,
+    Emp_salary NUMBER(10, 2)
+);
+
+
+-- Create Insert Trigger for Emp
+CREATE OR REPLACE TRIGGER Emp_After_Insert
+AFTER INSERT ON Emp
+FOR EACH ROW
+BEGIN
+    IF :NEW.Emp_salary < 50000 THEN
+        -- Insert into Tracking table for records with salary less than 50,000
+        INSERT INTO Tracking (Emp_no, Emp_salary)
+        VALUES (:NEW.Emp_no, :NEW.Emp_salary);
+        
+        -- Output message to console
+        DBMS_OUTPUT.PUT_LINE('Insert Trigger Fired: Salary below 50,000 for Emp_no ' || :NEW.Emp_no);
+    END IF;
+END;
+/
+
+
+-- Create Update Trigger
+CREATE OR REPLACE TRIGGER Emp_After_Update
+AFTER UPDATE ON Emp
+FOR EACH ROW
+BEGIN
+    -- Only insert into Tracking if the new salary is less than 50,000
+    IF :NEW.Emp_salary < 50000 THEN
+        -- Insert new salary into Tracking table
+        INSERT INTO Tracking (Emp_no, Emp_salary)
+        VALUES (:NEW.Emp_no, :NEW.Emp_salary);
+        -- Print the trigger firing message
+        DBMS_OUTPUT.PUT_LINE('Update Trigger Fired: Salary updated to below 50,000 for Emp_no ' || :NEW.Emp_no);
+    END IF;
+END;
+/
+
+-- Create Delete Trigger for Emp
+CREATE OR REPLACE TRIGGER Emp_After_Delete
+AFTER DELETE ON Emp
+FOR EACH ROW
+BEGIN
+    -- Insert the deleted record details into Tracking table
+    INSERT INTO Tracking (Emp_no, Emp_salary)
+    VALUES (:OLD.Emp_no, :OLD.Emp_salary);
+    
+    -- Output message to console
+    DBMS_OUTPUT.PUT_LINE('Delete Trigger Fired: Record deleted for Emp_no ' || :OLD.Emp_no);
+END;
+/
+
+INSERT INTO Emp (Emp_no, Emp_name, Emp_salary) VALUES (2, ' Doe', 55000);
+INSERT INTO Emp (Emp_no, Emp_name, Emp_salary) VALUES (3, 'Dove', 35000);
+
+UPDATE Emp SET Emp_salary = 70000 WHERE Emp_no = 2;
+

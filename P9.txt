@@ -1,0 +1,52 @@
+P9: Create a row level trigger for the CUSTOMERS table that
+would fire INSERT or UPDATE or DELETE operations performed on the
+CUSTOMERS table. This trigger will display the salary difference
+between the old values and new values.
+
+CREATE TABLE CUSTOMERS (
+    customer_id INT PRIMARY KEY,    
+    customer_name VARCHAR2(100),    
+    salary NUMBER(10, 2)            
+);
+
+CREATE OR REPLACE TRIGGER customers_salary_difference
+  AFTER INSERT OR UPDATE OR DELETE ON CUSTOMERS
+  FOR EACH ROW
+BEGIN
+  -- For INSERT: No previous value, so just display the new salary
+  IF INSERTING THEN
+    DBMS_OUTPUT.PUT_LINE('Inserted: Customer ' || :NEW.customer_id || ' has a salary of ' || :NEW.salary);
+  END IF;
+
+  -- For DELETE: Display the old salary
+  IF DELETING THEN
+    DBMS_OUTPUT.PUT_LINE('Deleted: Customer ' || :OLD.customer_id || ' had a salary of ' || :OLD.salary);
+  END IF;
+
+  -- For UPDATE: Display the difference between old and new salary
+  IF UPDATING THEN
+    DBMS_OUTPUT.PUT_LINE('Updated: Customer ' || :OLD.customer_id || ' salary changed from ' || :OLD.salary || ' to ' || :NEW.salary);
+  END IF;
+END;
+/
+
+
+-- Sample Data
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary)
+VALUES (1, 'John Doe', 60000);
+
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary)
+VALUES (2, 'Jane Smith', 45000);
+
+-- Insert a new customer
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary)
+VALUES (3, 'Alice Brown', 55000);
+
+-- Update an existing customer's salary
+UPDATE CUSTOMERS
+SET salary = 65000
+WHERE customer_id = 1;
+
+-- Delete a customer
+DELETE FROM CUSTOMERS
+WHERE customer_id = 2;
